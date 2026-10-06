@@ -1,0 +1,3261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Snakes and Ladder</title>
+  <meta name="description" content="An interactive educational Snakes and Ladder learning game with 3D dice, custom questions, trophy system, sound effects, and computer or multiplayer modes.">
+  <meta property="og:title" content="Snakes and Ladder">
+  <meta property="og:description" content="An interactive educational Snakes and Ladder learning game with 3D dice, custom questions, trophy system, sound effects, and computer or multiplayer modes.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <style>
+    :root {
+      --navy-deep: #051026;
+      --navy-dark: #0a1c3d;
+      --royal-blue: #0876ed;
+      --cyan-bright: #40e8ff;
+      --gold-bright: #ffd85b;
+      --gold-glow: rgba(255, 216, 91, 0.55);
+      --cream-bg: #fdfaf2;
+      --cream-text: #f4ebd0;
+      --p1-coral: #ff5d66;
+      --p2-blue: #1878ee;
+      --p3-green: #18a75b;
+      --p4-purple: #8a4de1;
+      --p5-orange: #ef8b20;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Trebuchet MS', 'Arial Rounded MT Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at 50% 15%, #0f3068 0%, #081a3d 50%, #040c1d 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Accessibility focus */
+    :focus-visible {
+      outline: 3px solid var(--gold-bright) !important;
+      outline-offset: 3px !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* HEADER */
+    header {
+      width: 100%;
+      max-width: 1320px;
+      padding: 14px 20px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .title-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
+    .game-title-img {
+      width: min(72vw, 720px);
+      height: 120px;
+      object-fit: cover;
+      object-position: left 40%;
+      filter: drop-shadow(0 8px 16px rgba(0, 15, 50, 0.7));
+      border-radius: 8px;
+      display: block;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-sound {
+      background: linear-gradient(135deg, #0d3880 0%, #07214e 100%);
+      color: #ffffff;
+      border: 2px solid var(--cyan-bright);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px rgba(64, 232, 255, 0.3);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-sound:hover {
+      background: linear-gradient(135deg, #134da8 0%, #092c68 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 15px rgba(64, 232, 255, 0.5);
+    }
+
+    .btn-sound:active {
+      transform: translateY(1px);
+    }
+
+    /* MAIN CONTAINER */
+    main {
+      width: 100%;
+      max-width: 1320px;
+      padding: 8px 16px 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* SCREENS */
+    .screen {
+      width: 100%;
+      display: none;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* SETTINGS SCREEN */
+    .settings-card {
+      width: 100%;
+      max-width: 820px;
+      background: linear-gradient(145deg, #0c234b 0%, #061530 100%);
+      border: 3px solid var(--cyan-bright);
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 0 35px rgba(64, 232, 255, 0.25), 0 16px 36px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .settings-header {
+      text-align: center;
+    }
+
+    .settings-heading {
+      font-size: clamp(26px, 4vw, 36px);
+      font-weight: 900;
+      color: var(--gold-bright);
+      text-shadow: 0 0 15px var(--gold-glow);
+      margin-bottom: 6px;
+    }
+
+    .settings-subtitle {
+      font-size: 15px;
+      color: #b8d2ff;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Mode selector */
+    .mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .mode-card {
+      background: rgba(8, 30, 68, 0.7);
+      border: 2px solid #205ca8;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 84px;
+    }
+
+    .mode-card:hover {
+      background: rgba(14, 48, 105, 0.9);
+      border-color: var(--cyan-bright);
+    }
+
+    .mode-card[aria-pressed="true"] {
+      border: 3px solid var(--gold-bright);
+      background: linear-gradient(135deg, #0e3b7d 0%, #1752aa 100%);
+      box-shadow: 0 0 20px rgba(255, 216, 91, 0.4), inset 0 0 12px rgba(64, 232, 255, 0.3);
+      transform: scale(1.02);
+    }
+
+    .mode-card .mode-name {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .mode-card .mode-desc {
+      font-size: 13px;
+      color: #c0d7ff;
+    }
+
+    /* Player count pills */
+    .player-count-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      background: rgba(4, 18, 42, 0.6);
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid #1a4a88;
+    }
+
+    .player-count-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: #c0d7ff;
+    }
+
+    .player-count-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-count {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid #205ca8;
+      background: #092452;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-count:hover {
+      border-color: var(--cyan-bright);
+      background: #11387a;
+    }
+
+    .btn-count[aria-pressed="true"] {
+      background: var(--gold-bright);
+      color: #051026;
+      border-color: #ffffff;
+      box-shadow: 0 0 12px var(--gold-glow);
+      font-weight: 900;
+      transform: scale(1.1);
+    }
+
+    /* Player name fields */
+    .player-inputs-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .player-input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(6, 20, 48, 0.6);
+      border: 1px solid #163f75;
+      padding: 8px 14px;
+      border-radius: 12px;
+    }
+
+    .player-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4);
+    }
+
+    .player-badge-label {
+      font-size: 14px;
+      font-weight: bold;
+      width: 40px;
+      flex-shrink: 0;
+      color: #ffffff;
+    }
+
+    .player-name-input {
+      flex: 1;
+      background: #04122d;
+      border: 1.5px solid #205ca8;
+      border-radius: 8px;
+      color: #ffffff;
+      padding: 8px 12px;
+      font-size: 15px;
+      font-family: inherit;
+    }
+
+    .player-name-input:focus {
+      border-color: var(--cyan-bright);
+      box-shadow: 0 0 8px rgba(64, 232, 255, 0.4);
+      outline: none;
+    }
+
+    .player-name-input:disabled {
+      opacity: 0.7;
+      background: #020917;
+      cursor: not-allowed;
+    }
+
+    .names-action-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 6px;
+    }
+
+    .btn-save-names {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: 2px solid #6ee7b7;
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-save-names:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      transform: translateY(-1px);
+    }
+
+    .names-status-tag {
+      font-size: 14px;
+      color: #93c5fd;
+      font-weight: 600;
+    }
+
+    .names-status-tag.unsaved {
+      color: #fbbf24;
+    }
+
+    .names-status-tag.saved {
+      color: #6ee7b7;
+    }
+
+    /* Questions details */
+    details.questions-box {
+      background: rgba(6, 20, 48, 0.7);
+      border: 2px solid #1a4d8c;
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.2s ease;
+    }
+
+    details.questions-box[open] {
+      border-color: var(--cyan-bright);
+    }
+
+    summary.questions-summary {
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--cyan-bright);
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      list-style: none;
+      background: rgba(10, 32, 74, 0.5);
+    }
+
+    summary.questions-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary.questions-summary::after {
+      content: '▼';
+      font-size: 12px;
+      color: var(--gold-bright);
+      transition: transform 0.2s ease;
+    }
+
+    details[open] summary.questions-summary::after {
+      transform: rotate(180deg);
+    }
+
+    .questions-content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      background: rgba(4, 14, 34, 0.95);
+    }
+
+    .bulk-editor-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bulk-textareas-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .textarea-col {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .textarea-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #b0c9f0;
+    }
+
+    .bulk-textarea {
+      width: 100%;
+      height: 140px;
+      background: #020b1c;
+      border: 1.5px solid #1d4e8c;
+      border-radius: 8px;
+      color: #ffffff;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 13px;
+      resize: vertical;
+    }
+
+    .bulk-textarea:focus {
+      border-color: var(--cyan-bright);
+      outline: none;
+    }
+
+    .btn-bulk-import {
+      align-self: flex-start;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: #ffffff;
+      border: 1.5px solid #60a5fa;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-bulk-import:hover {
+      background: #1d4ed8;
+    }
+
+    .single-sq-editor {
+      border-top: 1px solid #143560;
+      padding-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .single-sq-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .sq-select {
+      background: #030d22;
+      border: 1.5px solid #205ca8;
+      border-radius: 8px;
+      color: #ffffff;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .sq-input {
+      flex: 1;
+      min-width: 180px;
+      background: #030d22;
+      border: 1.5px solid #205ca8;
+      border-radius: 8px;
+      color: #ffffff;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .btn-secondary {
+      background: #1e3a6a;
+      color: #ffffff;
+      border: 1px solid #3b82f6;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: #2563eb;
+    }
+
+    .btn-danger {
+      background: #7f1d1d;
+      color: #fecaca;
+      border: 1px solid #ef4444;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-danger:hover {
+      background: #991b1b;
+    }
+
+    .q-status-msg {
+      font-size: 13px;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .q-status-msg.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid #059669;
+    }
+
+    .q-status-msg.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid #dc2626;
+    }
+
+    /* Enhanced Question Editor Styles */
+    .questions-top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1a4d8c;
+    }
+
+    .btn-save-all-q {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: 2px solid #6ee7b7;
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 14.5px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-save-all-q:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .btn-load-defaults {
+      background: #1e3a6a;
+      color: #93c5fd;
+      border: 1px solid #3b82f6;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-load-defaults:hover {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .all-q-status {
+      font-size: 13.5px;
+      font-weight: bold;
+      color: #6ee7b7;
+    }
+
+    .q-editor-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 8px 0 14px;
+    }
+
+    .q-tab-btn {
+      background: #09224d;
+      color: #93c5fd;
+      border: 1.5px solid #1d4e8c;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .q-tab-btn[aria-selected="true"] {
+      background: #1d4ed8;
+      color: #ffffff;
+      border-color: var(--cyan-bright);
+      box-shadow: 0 0 10px rgba(64, 232, 255, 0.35);
+    }
+
+    .q-tab-panel {
+      display: none;
+    }
+
+    .q-tab-panel.active {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .all-squares-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .all-squares-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .all-squares-list::-webkit-scrollbar-thumb {
+      background: #2563eb;
+      border-radius: 4px;
+    }
+
+    .all-sq-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(8, 26, 60, 0.6);
+      border: 1px solid #194680;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    .all-sq-badge {
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--cyan-bright);
+      width: 72px;
+      flex-shrink: 0;
+    }
+
+    .all-sq-input {
+      background: #020b1c;
+      border: 1.5px solid #1d4e8c;
+      border-radius: 6px;
+      color: #ffffff;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .all-sq-input.q-input { flex: 2; min-width: 140px; }
+    .all-sq-input.a-input { flex: 1; min-width: 90px; }
+    .all-sq-input:focus { border-color: var(--cyan-bright); outline: none; }
+
+    .btn-edit-toggle {
+      background: transparent;
+      border: none;
+      color: var(--cyan-bright);
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: underline;
+      align-self: flex-start;
+      padding: 0;
+      margin-top: 4px;
+    }
+
+    /* Start Button */
+    .start-game-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+      color: #ffffff;
+      border: 3px solid #6ee7b7;
+      border-radius: 16px;
+      padding: 16px 24px;
+      font-size: clamp(20px, 3vw, 24px);
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.45), 0 8px 20px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+    }
+
+    .start-game-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 32px rgba(16, 185, 129, 0.6), 0 12px 24px rgba(0, 0, 0, 0.5);
+      background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
+    }
+
+    .start-game-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* GAME SCREEN */
+    .game-nav-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, #133975 0%, #0a214d 100%);
+      color: #ffffff;
+      border: 1.5px solid var(--cyan-bright);
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .nav-btn:hover {
+      background: linear-gradient(135deg, #1e4f9e 0%, #0e306e 100%);
+      transform: translateY(-1px);
+      border-color: #ffffff;
+    }
+
+    /* GAME LAYOUT */
+    .game-layout {
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: clamp(16px, 2.5vw, 32px);
+    }
+
+    /* BOARD SECTION */
+    .board-section {
+      flex: 1;
+      max-width: 880px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    /* BOARD FRAME */
+    .board-frame {
+      width: 100%;
+      aspect-ratio: 5 / 4;
+      border: 5px solid #40e8ff;
+      border-radius: 24px;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.45), 0 0 50px rgba(64, 232, 255, 0.4), inset 0 0 15px rgba(8, 118, 237, 0.6), 0 16px 36px rgba(5, 16, 38, 0.85);
+      position: relative;
+      overflow: hidden;
+      background: #020914;
+    }
+
+    /* Board Background Picture */
+    .board-bg-img {
+      position: absolute;
+      left: 49.5%;
+      top: 52.8%;
+      width: 120%;
+      height: 123%;
+      transform: translate(-50%, -50%);
+      object-fit: fill;
+      pointer-events: none;
+      user-select: none;
+      z-index: 1;
+    }
+
+    /* Grid Hit Areas */
+    .board-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      z-index: 3;
+    }
+
+    .square-cell {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      background: transparent;
+    }
+
+    /* Question-mark buttons */
+    .q-btn {
+      position: absolute;
+      top: 11%;
+      right: 7%;
+      width: clamp(24px, 3.2vw, 34px);
+      height: clamp(24px, 3.2vw, 34px);
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: clamp(14px, 1.8vw, 19px);
+      color: #ffffff;
+      z-index: 5;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .q-btn:hover {
+      transform: scale(1.15);
+      z-index: 6;
+    }
+
+    /* Square 10 custom position */
+    .square-cell[data-square="10"] .q-btn {
+      right: 24% !important;
+    }
+
+    /* 5 repeating colors: green, blue, purple, coral, orange */
+    .q-btn.color-1 { background: #18a75b; }
+    .q-btn.color-2 { background: #1878ee; }
+    .q-btn.color-3 { background: #8a4de1; }
+    .q-btn.color-4 { background: #ff5d66; }
+    .q-btn.color-5 { background: #ef8b20; }
+
+    /* When saved question exists: green with soft green glow */
+    .q-btn.has-question {
+      background: #10b981 !important;
+      border-color: #d1fae5 !important;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.85), 0 3px 6px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    /* TOKENS LAYER */
+    .tokens-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 8;
+    }
+
+    .player-token {
+      position: absolute;
+      width: clamp(24px, 4vw, 42px);
+      height: clamp(24px, 4vw, 42px);
+      border-radius: 50%;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: clamp(12px, 2vw, 18px);
+      color: #ffffff;
+      user-select: none;
+      pointer-events: none;
+      transition: left 0.26s cubic-bezier(0.2, 0.8, 0.3, 1), top 0.26s cubic-bezier(0.2, 0.8, 0.3, 1), transform 0.26s ease-out;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .player-token.hopping {
+      transform: translate(-50%, -50%) translateY(-16px) scale(1.15) !important;
+    }
+
+    .player-token.token-p1 { background: radial-gradient(circle at 35% 35%, #ff858d 0%, #ff5d66 60%, #cc333c 100%); }
+    .player-token.token-p2 { background: radial-gradient(circle at 35% 35%, #599fff 0%, #1878ee 60%, #0d54b3 100%); }
+    .player-token.token-p3 { background: radial-gradient(circle at 35% 35%, #42d184 0%, #18a75b 60%, #0d793f 100%); }
+    .player-token.token-p4 { background: radial-gradient(circle at 35% 35%, #b17ef4 0%, #8a4de1 60%, #6127b5 100%); }
+    .player-token.token-p5 { background: radial-gradient(circle at 35% 35%, #ffa84a 0%, #ef8b20 60%, #b86007 100%); }
+
+    /* STARTING DOCK */
+    .starting-dock {
+      width: 100%;
+      background: linear-gradient(135deg, #091c3d 0%, #051026 100%);
+      border: 2px solid #1a56a6;
+      border-radius: 16px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(8, 118, 237, 0.2);
+      position: relative;
+    }
+
+    .dock-title {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--cyan-bright);
+      text-shadow: 0 0 8px rgba(64, 232, 255, 0.5);
+      text-transform: uppercase;
+    }
+
+    .dock-area {
+      flex: 1;
+      height: 48px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* RIGHT COLUMN (CONTROL PANEL + SIGNATURE) */
+    .control-column {
+      width: clamp(260px, 24vw, 320px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .control-panel {
+      background: var(--cream-bg);
+      border: 3px solid var(--cyan-bright);
+      box-shadow: 0 0 0 3px #0876ed, 0 12px 28px rgba(0, 15, 45, 0.45);
+      border-radius: 20px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      color: #1e293b;
+    }
+
+    .turn-header {
+      text-align: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 12px;
+    }
+
+    .turn-caption {
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .active-player-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 20px;
+      font-weight: 900;
+      color: #0f172a;
+    }
+
+    .active-player-pip {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.4);
+    }
+
+    .status-message {
+      background: #eef4ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      color: #1e3a8a;
+      font-weight: 600;
+      text-align: center;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.35;
+    }
+
+    /* Avatar & Dice Row */
+    .avatar-dice-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 12px;
+      padding: 6px 0;
+    }
+
+    /* Side Avatar Box */
+    .avatar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .avatar-q-marks {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+      font-weight: 900;
+      font-size: 15px;
+    }
+
+    .avatar-q-marks span {
+      display: inline-block;
+      color: #0284c7;
+      animation: floatQ 2s infinite ease-in-out alternate;
+    }
+
+    .avatar-q-marks .q1 { animation-delay: 0s; color: #ef4444; }
+    .avatar-q-marks .q2 { animation-delay: 0.35s; color: #3b82f6; }
+    .avatar-q-marks .q3 { animation-delay: 0.7s; color: #10b981; }
+
+    @keyframes floatQ {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-6px); }
+    }
+
+    .avatar-box {
+      width: 84px;
+      height: 96px;
+      border-radius: 16px;
+      border: 2px solid var(--cyan-bright);
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      background: #061838;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .side-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* STATIONARY 3D DICE BUTTON */
+    .dice-stage-btn {
+      width: 96px;
+      height: 96px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 600px;
+      position: relative;
+      padding: 0;
+    }
+
+    .dice-stage-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.85;
+    }
+
+    .dice-cube {
+      width: 76px;
+      height: 76px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(-12deg) rotateY(16deg);
+      transition: transform 1s cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+
+    .dice-face {
+      position: absolute;
+      width: 76px;
+      height: 76px;
+      background: linear-gradient(135deg, #32dfff 0%, #087cf4 35%, #0a439f 70%, #061c52 100%);
+      border: 2px solid var(--gold-bright);
+      border-radius: 15px;
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6), 0 4px 8px rgba(6, 28, 82, 0.5);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 7px;
+      box-sizing: border-box;
+      backface-visibility: hidden;
+    }
+
+    .pip {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff7b2 0%, #ffd85b 60%, #b8860b 100%);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.6), 0 0 5px rgba(255, 216, 91, 0.9);
+      align-self: center;
+      justify-self: center;
+    }
+
+    /* Face orientations (38px = half of 76px) */
+    .face-1 { transform: rotateY(0deg) translateZ(38px); }
+    .face-6 { transform: rotateY(180deg) translateZ(38px); }
+    .face-3 { transform: rotateY(90deg) translateZ(38px); }
+    .face-4 { transform: rotateY(-90deg) translateZ(38px); }
+    .face-2 { transform: rotateX(90deg) translateZ(38px); }
+    .face-5 { transform: rotateX(-90deg) translateZ(38px); }
+
+    /* Move Button (Human turn) */
+    .move-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: 2px solid #6ee7b7;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+      transition: all 0.2s ease;
+      animation: pulseMove 1.5s infinite alternate;
+    }
+
+    @keyframes pulseMove {
+      0% { transform: scale(0.98); box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+      100% { transform: scale(1.02); box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
+    }
+
+    .move-btn:hover {
+      background: #059669;
+    }
+
+    .move-btn.hidden {
+      display: none;
+    }
+
+    /* Player List */
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-top: 2px solid #e2e8f0;
+      padding-top: 12px;
+    }
+
+    .player-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      transition: all 0.2s ease;
+    }
+
+    .player-list-item.active {
+      border: 2.5px solid #0876ed;
+      background: #f0f7ff;
+      box-shadow: 0 0 12px rgba(8, 118, 237, 0.25);
+      transform: translateX(2px);
+    }
+
+    .player-item-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .player-item-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .player-item-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    .player-item-trophies {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #d97706;
+    }
+
+    /* FOOTER SIGNATURE */
+    .footer-sig {
+      text-align: center;
+      padding-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .footer-sig strong {
+      color: var(--gold-bright);
+      font-size: 15px;
+      font-weight: 900;
+      text-shadow: 0 0 8px rgba(255, 216, 91, 0.5);
+    }
+
+    .footer-sig span {
+      color: var(--cream-text);
+      font-size: 12.5px;
+      opacity: 0.9;
+    }
+
+    /* MODALS & OVERLAYS */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 16, 38, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-window {
+      background: linear-gradient(145deg, #0d2857 0%, #061530 100%);
+      border: 3px solid var(--cyan-bright);
+      border-radius: 20px;
+      padding: 26px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 0 30px rgba(64, 232, 255, 0.35), 0 20px 40px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      color: #ffffff;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--gold-bright);
+      text-shadow: 0 0 10px var(--gold-glow);
+    }
+
+    .modal-question-text {
+      font-size: 17px;
+      line-height: 1.4;
+      background: rgba(4, 18, 44, 0.7);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #1a4d8c;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: #020917;
+      border: 2px solid #2563eb;
+      border-radius: 10px;
+      color: #ffffff;
+      padding: 12px 14px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+
+    .modal-input:focus {
+      border-color: var(--cyan-bright);
+      box-shadow: 0 0 10px rgba(64, 232, 255, 0.4);
+      outline: none;
+    }
+
+    .modal-feedback {
+      font-size: 14.5px;
+      font-weight: bold;
+      min-height: 22px;
+    }
+
+    .modal-feedback.correct {
+      color: #6ee7b7;
+    }
+
+    .modal-feedback.wrong {
+      color: #fca5a5;
+    }
+
+    .modal-feedback.info {
+      color: #93c5fd;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .btn-modal-close {
+      background: #1e3a6a;
+      color: #ffffff;
+      border: 1px solid #3b82f6;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-modal-submit {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: 2px solid #6ee7b7;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    }
+
+    /* SNAKE CRYING TOAST OVERLAY */
+    .snake-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.7);
+      background: rgba(127, 29, 29, 0.95);
+      border: 3px solid #ef4444;
+      border-radius: 24px;
+      padding: 24px 36px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 150;
+      box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
+      transition: all 0.25s ease-out;
+    }
+
+    .snake-toast.show {
+      display: flex;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .snake-toast-emoji {
+      font-size: 72px;
+      line-height: 1;
+      animation: wobble 0.6s infinite ease-in-out alternate;
+    }
+
+    @keyframes wobble {
+      0% { transform: rotate(-8deg); }
+      100% { transform: rotate(8deg); }
+    }
+
+    .snake-toast-text {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    /* VICTORY OVERLAY */
+    .victory-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(13, 40, 87, 0.96) 0%, rgba(3, 10, 26, 0.98) 100%);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .victory-overlay.show {
+      display: flex;
+    }
+
+    .victory-trophy-large {
+      font-size: clamp(80px, 14vw, 130px);
+      line-height: 1;
+      filter: drop-shadow(0 0 25px rgba(255, 216, 91, 0.8));
+      animation: trophyBob 2s infinite ease-in-out alternate;
+    }
+
+    @keyframes trophyBob {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-12px) scale(1.05); }
+    }
+
+    .victory-heading {
+      font-size: clamp(38px, 6vw, 64px);
+      font-weight: 900;
+      color: var(--gold-bright);
+      text-shadow: 0 0 25px var(--gold-glow);
+      margin: 12px 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .victory-player-name {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .victory-reason {
+      font-size: 18px;
+      color: #b8d2ff;
+      margin-bottom: 28px;
+    }
+
+    .btn-play-again {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: 3px solid #6ee7b7;
+      padding: 16px 36px;
+      border-radius: 999px;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.5), 0 8px 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .btn-play-again:hover {
+      transform: scale(1.05);
+      background: #059669;
+    }
+
+    /* CONFETTI */
+    .confetti-container {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 14px;
+      top: -20px;
+      opacity: 0.9;
+      animation: confettiFall linear infinite;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotateZ(0deg) rotateX(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(105vh) rotateZ(720deg) rotateX(360deg);
+        opacity: 0.2;
+      }
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 850px) {
+      .game-layout {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .control-column {
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .avatar-dice-row {
+        justify-content: center;
+        gap: 36px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header {
+        padding: 8px 12px;
+      }
+
+      .game-title-img {
+        width: min(64vw, 250px);
+        height: 46px;
+      }
+
+      .btn-sound {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+
+      main {
+        padding: 6px 10px 18px;
+      }
+
+      .settings-card {
+        padding: 18px 14px;
+        border-radius: 18px;
+      }
+
+      .mode-selector {
+        grid-template-columns: 1fr;
+      }
+
+      .bulk-textareas-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .board-frame {
+        border-width: 3.5px;
+        border-radius: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="title-wrapper">
+      <img id="headerTitleImg" class="game-title-img" alt="SNAKES AND LADDER" src="__TITLE_DATA_URI__">
+    </div>
+    <div class="header-actions">
+      <button id="btnSoundToggle" class="btn-sound" aria-label="Toggle sound" aria-pressed="true">
+        🔊 Sound on
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- SCREEN 1: SETTINGS SCREEN -->
+    <section id="settingsScreen" class="screen active" aria-labelledby="settingsHeading">
+      <div class="settings-card">
+        <div class="settings-header">
+          <h1 id="settingsHeading" class="settings-heading">Set up your game</h1>
+          <p class="settings-subtitle">Choose how to play, save the player names, and add your learning questions.</p>
+        </div>
+
+        <!-- MODE SELECTION -->
+        <div>
+          <div class="section-title"><span>🎮</span> Choose play mode</div>
+          <div class="mode-selector">
+            <button id="modeVsCpu" class="mode-card" type="button" aria-pressed="true">
+              <span class="mode-name">🤖 Versus computer</span>
+              <span class="mode-desc">1 player against automatic CPU</span>
+            </button>
+            <button id="modeMulti" class="mode-card" type="button" aria-pressed="false">
+              <span class="mode-name">👥 Various players</span>
+              <span class="mode-desc">2 to 5 local players sharing device</span>
+            </button>
+          </div>
+
+          <!-- LOCAL PLAYER COUNT BUTTONS (shown when Various players is active) -->
+          <div id="playerCountContainer" class="player-count-container" style="display: none;">
+            <span class="player-count-label">Number of players:</span>
+            <div class="player-count-btns">
+              <button class="btn-count" type="button" data-count="2" aria-pressed="true">2</button>
+              <button class="btn-count" type="button" data-count="3" aria-pressed="false">3</button>
+              <button class="btn-count" type="button" data-count="4" aria-pressed="false">4</button>
+              <button class="btn-count" type="button" data-count="5" aria-pressed="false">5</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLAYER NAMES -->
+        <div>
+          <div class="section-title"><span>🏷️</span> Player names (optional)</div>
+          <div id="playerInputsGrid" class="player-inputs-grid">
+            <!-- Dynamically populated rows -->
+          </div>
+          <div class="names-action-bar">
+            <button id="btnSaveNames" class="btn-save-names" type="button">Save player names</button>
+            <span id="namesStatusTag" class="names-status-tag"></span>
+          </div>
+        </div>
+
+        <!-- QUESTIONS EDITOR -->
+        <details id="questionsDetails" class="questions-box" open>
+          <summary class="questions-summary">Add or edit my questions</summary>
+          <div class="questions-content">
+            <!-- Top Action Bar -->
+            <div class="questions-top-bar">
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button id="btnSaveAllQuestions" class="btn-save-all-q" type="button">💾 Save All Questions</button>
+                <button id="btnLoadDefaultQuestions" class="btn-load-defaults" type="button">↺ Load 20 Science Questions</button>
+              </div>
+              <span id="allQuestionsStatus" class="all-q-status"></span>
+            </div>
+
+            <!-- Editor Navigation Tabs -->
+            <div class="q-editor-tabs" role="tablist">
+              <button id="tabAllSquaresBtn" class="q-tab-btn" type="button" role="tab" aria-selected="true">📋 All 20 Squares List</button>
+              <button id="tabSingleSqBtn" class="q-tab-btn" type="button" role="tab" aria-selected="false">🎯 Single Square Editor</button>
+              <button id="tabBulkBtn" class="q-tab-btn" type="button" role="tab" aria-selected="false">📝 Bulk Text Import</button>
+            </div>
+
+            <!-- Tab 1: All 20 Squares List Panel -->
+            <div id="tabAllSquaresPanel" class="q-tab-panel active" role="tabpanel">
+              <div style="font-size: 13.5px; color: #93c5fd; font-weight: bold;">
+                Type your questions and exact answers below. Everything saves automatically!
+              </div>
+              <div id="allSquaresList" class="all-squares-list">
+                <!-- Dynamically populated 20 square rows -->
+              </div>
+            </div>
+
+            <!-- Tab 2: Single Square Editor Panel -->
+            <div id="tabSingleSqPanel" class="q-tab-panel" role="tabpanel">
+              <div class="single-sq-editor" style="border-top: none; padding-top: 0;">
+                <div style="font-size: 14px; font-weight: bold; color: #93c5fd;">Single Square Selector</div>
+                <div class="single-sq-controls">
+                  <label for="singleSqSelect" class="sr-only">Choose square</label>
+                  <select id="singleSqSelect" class="sq-select">
+                    <!-- Squares 1 to 20 -->
+                  </select>
+                  <input id="singleQuestionInput" class="sq-input" type="text" placeholder="Question for this square">
+                  <input id="singleAnswerInput" class="sq-input" type="text" placeholder="Exact answer">
+                  <button id="btnSaveSingleSq" class="btn-secondary" type="button">Save this square</button>
+                  <button id="btnClearSingleSq" class="btn-danger" type="button">Clear this square</button>
+                </div>
+                <div id="singleSqStatusMsg" class="q-status-msg"></div>
+              </div>
+            </div>
+
+            <!-- Tab 3: Bulk Text Import Panel -->
+            <div id="tabBulkPanel" class="q-tab-panel" role="tabpanel">
+              <div class="bulk-editor-container">
+                <div style="font-size: 14px; font-weight: bold; color: #93c5fd;">Bulk Import (1 to 20 questions, one per line)</div>
+                <div class="bulk-textareas-grid">
+                  <div class="textarea-col">
+                    <label class="textarea-label" for="bulkQuestions">Questions, one per line:</label>
+                    <textarea id="bulkQuestions" class="bulk-textarea" placeholder="What is 5 + 5?&#10;Capital of France?&#10;..."></textarea>
+                  </div>
+                  <div class="textarea-col">
+                    <label class="textarea-label" for="bulkAnswers">Answers, one per line:</label>
+                    <textarea id="bulkAnswers" class="bulk-textarea" placeholder="10&#10;Paris&#10;..."></textarea>
+                  </div>
+                </div>
+                <button id="btnBulkImport" class="btn-bulk-import" type="button">Import bulk questions</button>
+                <div id="bulkStatusMsg" class="q-status-msg"></div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- START GAME BUTTON -->
+        <button id="btnStartGame" class="start-game-btn" type="button">Start the game ▶</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: GAME SCREEN -->
+    <section id="gameScreen" class="screen" aria-label="Game Screen">
+      <!-- TOP NAV BAR -->
+      <div class="game-nav-bar">
+        <button id="btnBackSettings" class="nav-btn" type="button">← Back to settings</button>
+        <button id="btnRestartGame" class="nav-btn" type="button">↻ Restart game</button>
+      </div>
+
+      <!-- MAIN GAME LAYOUT -->
+      <div class="game-layout">
+        <!-- LEFT: BOARD SECTION -->
+        <div class="board-section">
+          <!-- BOARD FRAME -->
+          <div id="boardFrame" class="board-frame" aria-label="Snakes and Ladder Board">
+            <!-- Mandatory board artwork image -->
+            <img id="boardArtworkImg" class="board-bg-img" alt="Snakes and Ladder Board Artwork" src="__BOARD_DATA_URI__">
+
+            <!-- 5x4 Grid Hit Areas -->
+            <div id="boardGrid" class="board-grid">
+              <!-- Squares 1 to 20 dynamically injected in serpentine order -->
+            </div>
+
+            <!-- Tokens Layer -->
+            <div id="tokensLayer" class="tokens-layer">
+              <!-- Player tokens positioned with getBoundingClientRect -->
+            </div>
+          </div>
+
+          <!-- STARTING DOCK -->
+          <div id="startingDock" class="starting-dock" aria-label="Starting Dock for tokens at position 0">
+            <span class="dock-title">Starting Dock</span>
+            <div id="dockTokensArea" class="dock-area"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: CONTROL COLUMN -->
+        <aside class="control-column">
+          <!-- Cream Control Panel -->
+          <div class="control-panel">
+            <div class="turn-header">
+              <div class="turn-caption">Current Turn</div>
+              <div id="activePlayerBadge" class="active-player-badge">
+                <span id="activePlayerPip" class="active-player-pip"></span>
+                <span id="activePlayerName">Player 1</span>
+              </div>
+            </div>
+
+            <div id="statusMessage" class="status-message" aria-live="polite">Click the dice to roll.</div>
+
+            <!-- Avatar & 3D Dice Row -->
+            <div class="avatar-dice-row">
+              <!-- Side Avatar -->
+              <div class="avatar-container" aria-label="Game Mascot">
+                <div class="avatar-q-marks" aria-hidden="true">
+                  <span class="q1">?</span>
+                  <span class="q2">?</span>
+                  <span class="q3">?</span>
+                </div>
+                <div class="avatar-box">
+                  <img id="avatarImg" class="side-avatar-img" alt="Side mascot avatar" src="__AVATAR_DATA_URI__">
+                </div>
+              </div>
+
+              <!-- Stationary 3D Dice Button -->
+              <button id="btnDice" class="dice-stage-btn" type="button" aria-label="Roll 3D Dice">
+                <div id="diceCube" class="dice-cube" aria-hidden="true">
+                  <!-- Face 1: 1 pip -->
+                  <div class="dice-face face-1">
+                    <div></div><div></div><div></div>
+                    <div></div><div class="pip"></div><div></div>
+                    <div></div><div></div><div></div>
+                  </div>
+                  <!-- Face 6: 6 pips -->
+                  <div class="dice-face face-6">
+                    <div class="pip"></div><div></div><div class="pip"></div>
+                    <div class="pip"></div><div></div><div class="pip"></div>
+                    <div class="pip"></div><div></div><div class="pip"></div>
+                  </div>
+                  <!-- Face 3: 3 pips -->
+                  <div class="dice-face face-3">
+                    <div class="pip"></div><div></div><div></div>
+                    <div></div><div class="pip"></div><div></div>
+                    <div></div><div></div><div class="pip"></div>
+                  </div>
+                  <!-- Face 4: 4 pips -->
+                  <div class="dice-face face-4">
+                    <div class="pip"></div><div></div><div class="pip"></div>
+                    <div></div><div></div><div></div>
+                    <div class="pip"></div><div></div><div class="pip"></div>
+                  </div>
+                  <!-- Face 2: 2 pips -->
+                  <div class="dice-face face-2">
+                    <div class="pip"></div><div></div><div></div>
+                    <div></div><div></div><div></div>
+                    <div></div><div></div><div class="pip"></div>
+                  </div>
+                  <!-- Face 5: 5 pips -->
+                  <div class="dice-face face-5">
+                    <div class="pip"></div><div></div><div class="pip"></div>
+                    <div></div><div class="pip"></div><div></div>
+                    <div class="pip"></div><div></div><div class="pip"></div>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <!-- Glowing Move Button for Human Turn -->
+            <button id="btnMove" class="move-btn hidden" type="button">Move 0 spaces</button>
+
+            <!-- Player Scores List -->
+            <div id="playersList" class="player-list" aria-label="Players list and trophies">
+              <!-- Player rows -->
+            </div>
+          </div>
+
+          <!-- Dr.Abir Wafa Signature (outside control box) -->
+          <footer class="footer-sig">
+            <strong>Dr.Abir Wafa</strong>
+            <span>Head of EdTech at Edulixa</span>
+          </footer>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- QUESTION MODAL -->
+  <div id="questionModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-window">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 id="modalTitle" class="modal-title">Square 1 question</h2>
+        <button id="btnToggleModalEdit" class="btn-edit-toggle" type="button">✏️ Edit question</button>
+      </div>
+
+      <!-- Quick in-modal question editor -->
+      <div id="modalEditSection" style="display: none; background: rgba(3, 13, 34, 0.85); border: 1.5px solid #2563eb; border-radius: 12px; padding: 12px; flex-direction: column; gap: 8px;">
+        <label for="modalEditQInput" style="font-size: 12px; font-weight: bold; color: #93c5fd;">Question text:</label>
+        <input id="modalEditQInput" class="modal-input" style="padding: 8px 10px; font-size: 14px;" type="text" placeholder="Type question for this square...">
+        <label for="modalEditAInput" style="font-size: 12px; font-weight: bold; color: #93c5fd;">Exact answer:</label>
+        <input id="modalEditAInput" class="modal-input" style="padding: 8px 10px; font-size: 14px;" type="text" placeholder="Type exact answer...">
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;">
+          <button id="btnModalCancelEdit" class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" type="button">Cancel</button>
+          <button id="btnModalSaveQ" class="btn-secondary" style="background: #10b981; border-color: #6ee7b7; padding: 6px 14px; font-size: 12px;" type="button">💾 Save Question</button>
+        </div>
+      </div>
+
+      <div id="modalQuestionText" class="modal-question-text">Question text goes here?</div>
+      <input id="modalAnswerInput" class="modal-input" type="text" placeholder="Type your answer..." autocomplete="off">
+      <div id="modalFeedback" class="modal-feedback" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button id="btnModalClose" class="btn-modal-close" type="button">Close</button>
+        <button id="btnModalSubmit" class="btn-modal-submit" type="button">Check my answer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SNAKE CRYING TOAST -->
+  <div id="snakeToast" class="snake-toast" aria-live="assertive" role="alert">
+    <div class="snake-toast-emoji">😭</div>
+    <div id="snakeToastText" class="snake-toast-text">Oh no! A snake bites!</div>
+  </div>
+
+  <!-- FULL-SCREEN VICTORY OVERLAY -->
+  <div id="victoryOverlay" class="victory-overlay" role="dialog" aria-modal="true" aria-labelledby="victoryHeading">
+    <div id="confettiContainer" class="confetti-container" aria-hidden="true"></div>
+    <div class="victory-trophy-large">🏆</div>
+    <h2 id="victoryHeading" class="victory-heading">Victory!</h2>
+    <div id="victoryPlayerName" class="victory-player-name">Player 1</div>
+    <div id="victoryReason" class="victory-reason">reached square 20!</div>
+    <button id="btnPlayAgain" class="btn-play-again" type="button">Play again</button>
+  </div>
+
+  <!-- COMPLETE GAME ENGINE JAVASCRIPT -->
+  <script>
+    /* GAME CONSTANTS & ASSET FALLBACKS */
+    const RAW_ASSETS = {
+      board: "https://raw.githubusercontent.com/cs0028monglish-cmd/pictures-for-my-site-/main/snakes%20and%20Ladder.png",
+      title: "https://raw.githubusercontent.com/cs0028monglish-cmd/pictures-for-my-site-/main/title%20for%20snakes%20and%20ladder%20.png",
+      avatar: "https://raw.githubusercontent.com/cs0028monglish-cmd/pictures-for-my-site-/main/snakes%20and%20ladder%203.png"
+    };
+
+    // Fallbacks if data URIs fail
+    document.getElementById('boardArtworkImg').onerror = function() { this.src = RAW_ASSETS.board; };
+    document.getElementById('headerTitleImg').onerror = function() { this.src = RAW_ASSETS.title; };
+    document.getElementById('avatarImg').onerror = function() { this.src = RAW_ASSETS.avatar; };
+
+    // Player styling
+    const PLAYER_COLORS = [
+      { id: 1, name: 'P1', color: '#ff5d66', class: 'token-p1' },
+      { id: 2, name: 'P2', color: '#1878ee', class: 'token-p2' },
+      { id: 3, name: 'P3', color: '#18a75b', class: 'token-p3' },
+      { id: 4, name: 'P4', color: '#8a4de1', class: 'token-p4' },
+      { id: 5, name: 'P5', color: '#ef8b20', class: 'token-p5' }
+    ];
+
+    // Ladders and Snakes specifications
+    const LADDERS = { 2: 9, 7: 14, 12: 19 };
+    const SNAKES = { 11: 10, 13: 8, 15: 6 };
+
+    // Serpentine square layout (5 cols x 4 rows)
+    const SERPENTINE_ROWS = [
+      [20, 19, 18, 17, 16],
+      [11, 12, 13, 14, 15],
+      [10, 9, 8, 7, 6],
+      [1, 2, 3, 4, 5]
+    ];
+
+    /* WEB AUDIO API ENGINE */
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, duration, type, gainVal) {
+      if (!gameState.soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal || 0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    const Sound = {
+      save: function() {
+        playTone(523.25, 0.12, 'triangle', 0.15);
+        setTimeout(function() { playTone(659.25, 0.15, 'triangle', 0.15); }, 90);
+      },
+      roll: function() {
+        if (!gameState.soundEnabled) return;
+        initAudio();
+        if (!audioCtx) return;
+        for (let i = 0; i < 8; i++) {
+          setTimeout(function() {
+            playTone(200 + Math.random() * 260, 0.05, 'square', 0.04);
+          }, i * 110);
+        }
+      },
+      step: function() {
+        playTone(440, 0.08, 'sine', 0.18);
+        setTimeout(function() { playTone(587.33, 0.1, 'sine', 0.15); }, 40);
+      },
+      blocked: function() {
+        playTone(180, 0.22, 'sawtooth', 0.15);
+        setTimeout(function() { playTone(140, 0.3, 'sawtooth', 0.15); }, 120);
+      },
+      ladder: function() {
+        const freqs = [330, 392, 494, 587, 659];
+        freqs.forEach(function(f, idx) {
+          setTimeout(function() { playTone(f, 0.16, 'triangle', 0.15); }, idx * 80);
+        });
+      },
+      snake: function() {
+        if (!gameState.soundEnabled) return;
+        initAudio();
+        if (!audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(140, audioCtx.currentTime + 0.6);
+          gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.6);
+        } catch(e) {}
+      },
+      wrong: function() {
+        playTone(220, 0.18, 'sawtooth', 0.16);
+        setTimeout(function() { playTone(180, 0.25, 'sawtooth', 0.16); }, 160);
+      },
+      correct: function() {
+        playTone(523.25, 0.12, 'sine', 0.18);
+        setTimeout(function() { playTone(659.25, 0.12, 'sine', 0.18); }, 90);
+        setTimeout(function() { playTone(783.99, 0.2, 'sine', 0.2); }, 180);
+      },
+      trophy: function() {
+        const freqs = [523.25, 659.25, 783.99, 1046.5];
+        freqs.forEach(function(f, idx) {
+          setTimeout(function() { playTone(f, 0.2, 'triangle', 0.2); }, idx * 90);
+        });
+      },
+      victory: function() {
+        const notes = [
+          { f: 523.25, d: 0.18 }, { f: 659.25, d: 0.18 }, { f: 783.99, d: 0.22 },
+          { f: 659.25, d: 0.15 }, { f: 783.99, d: 0.18 }, { f: 1046.5, d: 0.55 }
+        ];
+        let delay = 0;
+        notes.forEach(function(n) {
+          setTimeout(function() { playTone(n.f, n.d, 'triangle', 0.25); }, delay);
+          delay += n.d * 1000 + 40;
+        });
+      }
+    };
+
+    /* STATE OBJECT */
+    const gameState = {
+      mode: 'cpu',
+      playerCount: 2,
+      savedNames: [],
+      players: [],
+      activeIndex: 0,
+      rolledValue: 0,
+      isBusy: false,
+      soundEnabled: true,
+      questions: Array(20).fill(null).map(function() { return { q: '', a: '' }; }),
+      openSquare: null,
+      isGameOver: false,
+      cpuTimer: null
+    };
+
+    /* LOCAL STORAGE HELPERS */
+    const CURRICULUM_KEY = 'snakeTrailCurriculum_v5_science_questions';
+    const DEFAULT_QUESTIONS = [
+      { q: "What do animals and humans need to stay alive?", a: "air" },
+      { q: "How many kinds of food do we need to stay healthy?", a: "5" },
+      { q: "Is the child in the picture obese or fit?", a: "obese" },
+      { q: "What does a cow eat?", a: "grass" },
+      { q: "What does food give us?", a: "energy" },
+      { q: "What do penguins eat?", a: "fish" },
+      { q: "Which food group includes apples and other fruits?", a: "fruit" },
+      { q: "Which food group does the sugar picture represent?", a: "sugar" },
+      { q: "Which food group includes fish and meat?", a: "protein" },
+      { q: "True or False: Microbes can damage our bodies and teeth.", a: "true" },
+      { q: "True or False: All offspring look exactly like their adult parents.", a: "false" },
+      { q: "True or False: Babies start big and then grow.", a: "false" },
+      { q: "True or False: Baby, toddler, child, and adult are human life stages.", a: "true" },
+      { q: "What comes first in the frog life cycle?", a: "eggs" },
+      { q: "What comes after the eggs in the frog life cycle?", a: "tadpole" },
+      { q: "What comes after the tadpole in the frog life cycle?", a: "young frog" },
+      { q: "What is the last stage in the frog life cycle?", a: "adult frog" },
+      { q: "Which human life stage comes after baby?", a: "toddler" },
+      { q: "Which human life stage comes after toddler?", a: "child" },
+      { q: "Which human life stage comes after child?", a: "adult" }
+    ];
+
+    window._snakeQuestionsBackup = null;
+
+    function saveQuestionsToStorage() {
+      const dataStr = JSON.stringify(gameState.questions);
+      window._snakeQuestionsBackup = JSON.parse(dataStr);
+      try {
+        localStorage.setItem('snakeTrailQuestions', dataStr);
+        localStorage.setItem(CURRICULUM_KEY, 'true');
+      } catch (e) {
+        console.warn('localStorage warning', e);
+      }
+      try {
+        sessionStorage.setItem('snakeTrailQuestions', dataStr);
+      } catch (e) {}
+    }
+
+    function loadSavedSettings() {
+      let isLatestCurriculum = false;
+      try {
+        isLatestCurriculum = localStorage.getItem(CURRICULUM_KEY) === 'true';
+      } catch (e) {}
+
+      let rawQ = null;
+      if (isLatestCurriculum) {
+        try {
+          rawQ = localStorage.getItem('snakeTrailQuestions');
+        } catch (e) {}
+        if (!rawQ) {
+          try {
+            rawQ = sessionStorage.getItem('snakeTrailQuestions');
+          } catch (e) {}
+        }
+        if (!rawQ && window._snakeQuestionsBackup) {
+          rawQ = JSON.stringify(window._snakeQuestionsBackup);
+        }
+      }
+
+      let validQuestionsLoaded = false;
+      if (rawQ) {
+        try {
+          const parsed = JSON.parse(rawQ);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const jsonText = JSON.stringify(parsed);
+            // Ignore legacy arithmetic test questions
+            if (!jsonText.includes('What is 7 + 8') && !jsonText.includes('capital of France')) {
+              let count = 0;
+              for (let i = 0; i < 20; i++) {
+                if (parsed[i]) {
+                  const qText = String(parsed[i].q || '').trim();
+                  const aText = String(parsed[i].a || '').trim();
+                  gameState.questions[i] = { q: qText, a: aText };
+                  if (qText.length > 0) count++;
+                }
+              }
+              if (count > 0) validQuestionsLoaded = true;
+            }
+          }
+        } catch (e) {
+          console.warn('Error reading saved questions', e);
+        }
+      }
+
+      if (!validQuestionsLoaded) {
+        for (let i = 0; i < 20; i++) {
+          gameState.questions[i] = {
+            q: DEFAULT_QUESTIONS[i].q,
+            a: DEFAULT_QUESTIONS[i].a
+          };
+        }
+        try {
+          localStorage.setItem(CURRICULUM_KEY, 'true');
+        } catch (e) {}
+        saveQuestionsToStorage();
+      }
+
+      try {
+        const rawN = localStorage.getItem('snakeTrailNames');
+        if (rawN) {
+          const parsed = JSON.parse(rawN);
+          if (Array.isArray(parsed)) {
+            gameState.savedNames = parsed.map(function(n) { return String(n).slice(0, 22); });
+          }
+        }
+      } catch (e) {
+        console.warn('Error reading snakeTrailNames', e);
+      }
+    }
+
+    function saveNamesToStorage() {
+      try {
+        localStorage.setItem('snakeTrailNames', JSON.stringify(gameState.savedNames));
+      } catch (e) {
+        console.warn('Error saving names', e);
+      }
+    }
+
+    /* SOUND TOGGLE */
+    const btnSoundToggle = document.getElementById('btnSoundToggle');
+    btnSoundToggle.addEventListener('click', function() {
+      initAudio();
+      gameState.soundEnabled = !gameState.soundEnabled;
+      btnSoundToggle.setAttribute('aria-pressed', gameState.soundEnabled ? 'true' : 'false');
+      btnSoundToggle.textContent = gameState.soundEnabled ? '🔊 Sound on' : '🔇 Sound off';
+      if (gameState.soundEnabled) Sound.save();
+    });
+
+    /* SETTINGS SCREEN LOGIC */
+    const modeVsCpu = document.getElementById('modeVsCpu');
+    const modeMulti = document.getElementById('modeMulti');
+    const playerCountContainer = document.getElementById('playerCountContainer');
+    const playerInputsGrid = document.getElementById('playerInputsGrid');
+    const btnSaveNames = document.getElementById('btnSaveNames');
+    const namesStatusTag = document.getElementById('namesStatusTag');
+    const btnCountBtns = document.querySelectorAll('.btn-count');
+
+    function updateModeSelection(mode) {
+      gameState.mode = mode;
+      if (mode === 'cpu') {
+        modeVsCpu.setAttribute('aria-pressed', 'true');
+        modeMulti.setAttribute('aria-pressed', 'false');
+        playerCountContainer.style.display = 'none';
+        gameState.playerCount = 2;
+      } else {
+        modeVsCpu.setAttribute('aria-pressed', 'false');
+        modeMulti.setAttribute('aria-pressed', 'true');
+        playerCountContainer.style.display = 'flex';
+      }
+      renderPlayerInputFields();
+    }
+
+    modeVsCpu.addEventListener('click', function() { updateModeSelection('cpu'); });
+    modeMulti.addEventListener('click', function() { updateModeSelection('multi'); });
+
+    btnCountBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const count = parseInt(btn.getAttribute('data-count'), 10);
+        gameState.playerCount = count;
+        btnCountBtns.forEach(function(b) {
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+        renderPlayerInputFields();
+      });
+    });
+
+    function renderPlayerInputFields() {
+      playerInputsGrid.innerHTML = '';
+      const total = gameState.playerCount;
+
+      for (let i = 0; i < total; i++) {
+        const row = document.createElement('div');
+        row.className = 'player-input-row';
+
+        const dot = document.createElement('div');
+        dot.className = 'player-dot';
+        dot.style.background = PLAYER_COLORS[i].color;
+
+        const badge = document.createElement('div');
+        badge.className = 'player-badge-label';
+        badge.textContent = PLAYER_COLORS[i].name;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'player-name-input';
+        input.maxLength = 22;
+        input.dataset.index = i;
+
+        if (gameState.mode === 'cpu' && i === 1) {
+          input.value = 'CPU';
+          input.disabled = true;
+        } else {
+          input.placeholder = PLAYER_COLORS[i].name;
+          input.value = gameState.savedNames[i] || '';
+          input.addEventListener('input', function() {
+            namesStatusTag.textContent = 'Unsaved changes';
+            namesStatusTag.className = 'names-status-tag unsaved';
+          });
+        }
+
+        row.appendChild(dot);
+        row.appendChild(badge);
+        row.appendChild(input);
+        playerInputsGrid.appendChild(row);
+      }
+
+      if (gameState.savedNames.length > 0) {
+        namesStatusTag.textContent = '✓ ' + Math.min(gameState.savedNames.length, total) + ' names saved';
+        namesStatusTag.className = 'names-status-tag saved';
+      } else {
+        namesStatusTag.textContent = '';
+      }
+    }
+
+    btnSaveNames.addEventListener('click', function() {
+      const inputs = playerInputsGrid.querySelectorAll('.player-name-input');
+      const newSaved = [];
+      inputs.forEach(function(inp, idx) {
+        if (gameState.mode === 'cpu' && idx === 1) {
+          newSaved.push('CPU');
+        } else {
+          newSaved.push(inp.value.trim().slice(0, 22));
+        }
+      });
+      gameState.savedNames = newSaved;
+      saveNamesToStorage();
+      Sound.save();
+      namesStatusTag.textContent = '✓ ' + newSaved.length + ' names saved';
+      namesStatusTag.className = 'names-status-tag saved';
+    });
+
+    /* QUESTION EDITOR LOGIC */
+    const btnSaveAllQuestions = document.getElementById('btnSaveAllQuestions');
+    const btnLoadDefaultQuestions = document.getElementById('btnLoadDefaultQuestions');
+    const allQuestionsStatus = document.getElementById('allQuestionsStatus');
+
+    const tabAllSquaresBtn = document.getElementById('tabAllSquaresBtn');
+    const tabSingleSqBtn = document.getElementById('tabSingleSqBtn');
+    const tabBulkBtn = document.getElementById('tabBulkBtn');
+
+    const tabAllSquaresPanel = document.getElementById('tabAllSquaresPanel');
+    const tabSingleSqPanel = document.getElementById('tabSingleSqPanel');
+    const tabBulkPanel = document.getElementById('tabBulkPanel');
+
+    const allSquaresList = document.getElementById('allSquaresList');
+
+    const singleSqSelect = document.getElementById('singleSqSelect');
+    const singleQuestionInput = document.getElementById('singleQuestionInput');
+    const singleAnswerInput = document.getElementById('singleAnswerInput');
+    const btnSaveSingleSq = document.getElementById('btnSaveSingleSq');
+    const btnClearSingleSq = document.getElementById('btnClearSingleSq');
+    const singleSqStatusMsg = document.getElementById('singleSqStatusMsg');
+
+    const bulkQuestions = document.getElementById('bulkQuestions');
+    const bulkAnswers = document.getElementById('bulkAnswers');
+    const btnBulkImport = document.getElementById('btnBulkImport');
+    const bulkStatusMsg = document.getElementById('bulkStatusMsg');
+
+    // Tab switching
+    function switchQuestionTab(activeTab) {
+      const tabs = [
+        { btn: tabAllSquaresBtn, panel: tabAllSquaresPanel, name: 'all' },
+        { btn: tabSingleSqBtn, panel: tabSingleSqPanel, name: 'single' },
+        { btn: tabBulkBtn, panel: tabBulkPanel, name: 'bulk' }
+      ];
+
+      tabs.forEach(function(t) {
+        if (t.name === activeTab) {
+          t.btn.setAttribute('aria-selected', 'true');
+          t.panel.classList.add('active');
+        } else {
+          t.btn.setAttribute('aria-selected', 'false');
+          t.panel.classList.remove('active');
+        }
+      });
+    }
+
+    tabAllSquaresBtn.addEventListener('click', function() { switchQuestionTab('all'); });
+    tabSingleSqBtn.addEventListener('click', function() { switchQuestionTab('single'); });
+    tabBulkBtn.addEventListener('click', function() { switchQuestionTab('bulk'); });
+
+    // Render All 20 Squares List
+    function renderAllSquaresList() {
+      if (!allSquaresList) return;
+      allSquaresList.innerHTML = '';
+
+      for (let i = 1; i <= 20; i++) {
+        const row = document.createElement('div');
+        row.className = 'all-sq-row';
+
+        const badge = document.createElement('span');
+        badge.className = 'all-sq-badge';
+        badge.textContent = 'Square ' + i + ':';
+
+        const qInput = document.createElement('input');
+        qInput.type = 'text';
+        qInput.className = 'all-sq-input q-input';
+        qInput.placeholder = 'Question ' + i + '...';
+        qInput.value = (gameState.questions[i - 1] && gameState.questions[i - 1].q) || '';
+        qInput.dataset.sq = i;
+
+        const aInput = document.createElement('input');
+        aInput.type = 'text';
+        aInput.className = 'all-sq-input a-input';
+        aInput.placeholder = 'Exact answer...';
+        aInput.value = (gameState.questions[i - 1] && gameState.questions[i - 1].a) || '';
+        aInput.dataset.sq = i;
+
+        (function(sqNum, qInp, aInp) {
+          function onRowInput() {
+            const qVal = qInp.value.trim();
+            const aVal = aInp.value.trim();
+            gameState.questions[sqNum - 1] = { q: qVal, a: aVal };
+            saveQuestionsToStorage();
+            updateBoardQuestionButtonsAppearance();
+
+            allQuestionsStatus.textContent = '✓ Saved Square ' + sqNum;
+            allQuestionsStatus.style.color = '#6ee7b7';
+
+            if (parseInt(singleSqSelect.value, 10) === sqNum) {
+              singleQuestionInput.value = qVal;
+              singleAnswerInput.value = aVal;
+            }
+
+            const opt = singleSqSelect.querySelector('option[value="' + sqNum + '"]');
+            if (opt) {
+              opt.textContent = 'Square ' + sqNum + (qVal ? ' (✓)' : '');
+            }
+          }
+
+          qInp.addEventListener('input', onRowInput);
+          aInp.addEventListener('input', onRowInput);
+        })(i, qInput, aInput);
+
+        row.appendChild(badge);
+        row.appendChild(qInput);
+        row.appendChild(aInput);
+        allSquaresList.appendChild(row);
+      }
+    }
+
+    function updateBulkTextareasFromQuestions() {
+      if (!bulkQuestions || !bulkAnswers) return;
+      bulkQuestions.value = gameState.questions.map(function(item) { return item ? item.q : ''; }).join('\n');
+      bulkAnswers.value = gameState.questions.map(function(item) { return item ? item.a : ''; }).join('\n');
+    }
+
+    function populateSingleSquareDropdown(targetSq) {
+      const selected = targetSq || parseInt(singleSqSelect.value, 10) || 1;
+      singleSqSelect.innerHTML = '';
+      for (let i = 1; i <= 20; i++) {
+        const opt = document.createElement('option');
+        opt.value = i;
+        const hasQ = gameState.questions[i - 1] && gameState.questions[i - 1].q.trim().length > 0;
+        opt.textContent = 'Square ' + i + (hasQ ? ' (✓)' : '');
+        if (i === selected) opt.selected = true;
+        singleSqSelect.appendChild(opt);
+      }
+      singleSqSelect.value = selected;
+      loadSingleSquareToInputs(selected);
+      updateBulkTextareasFromQuestions();
+      renderAllSquaresList();
+    }
+
+    function loadSingleSquareToInputs(sqNum) {
+      const rec = gameState.questions[sqNum - 1] || { q: '', a: '' };
+      singleQuestionInput.value = rec.q || '';
+      singleAnswerInput.value = rec.a || '';
+      singleSqStatusMsg.style.display = 'none';
+    }
+
+    function saveCurrentSquareInput(showStatus) {
+      const sq = parseInt(singleSqSelect.value, 10);
+      if (!sq || sq < 1 || sq > 20) return;
+      const q = singleQuestionInput.value.trim();
+      const a = singleAnswerInput.value.trim();
+
+      gameState.questions[sq - 1] = { q: q, a: a };
+      saveQuestionsToStorage();
+      updateBoardQuestionButtonsAppearance();
+
+      // Update in all squares list if present
+      const qRowInp = allSquaresList.querySelector('.q-input[data-sq="' + sq + '"]');
+      const aRowInp = allSquaresList.querySelector('.a-input[data-sq="' + sq + '"]');
+      if (qRowInp) qRowInp.value = q;
+      if (aRowInp) aRowInp.value = a;
+
+      const opt = singleSqSelect.querySelector('option[value="' + sq + '"]');
+      if (opt) {
+        opt.textContent = 'Square ' + sq + (q.length > 0 ? ' (✓)' : '');
+      }
+
+      if (showStatus) {
+        if (!q && !a) {
+          singleSqStatusMsg.textContent = 'Cleared question for square ' + sq + '.';
+          singleSqStatusMsg.className = 'q-status-msg success';
+        } else if (!q || !a) {
+          singleSqStatusMsg.textContent = 'Please enter both question and answer.';
+          singleSqStatusMsg.className = 'q-status-msg error';
+        } else {
+          singleSqStatusMsg.textContent = '✓ Saved question for square ' + sq + '.';
+          singleSqStatusMsg.className = 'q-status-msg success';
+        }
+      }
+    }
+
+    // Auto-save on typing in single square editor
+    singleQuestionInput.addEventListener('input', function() {
+      saveCurrentSquareInput(false);
+    });
+    singleAnswerInput.addEventListener('input', function() {
+      saveCurrentSquareInput(false);
+    });
+
+    singleSqSelect.addEventListener('change', function() {
+      saveCurrentSquareInput(false);
+      loadSingleSquareToInputs(parseInt(singleSqSelect.value, 10));
+    });
+
+    btnSaveSingleSq.addEventListener('click', function() {
+      const q = singleQuestionInput.value.trim();
+      const a = singleAnswerInput.value.trim();
+      const sq = parseInt(singleSqSelect.value, 10);
+      if (!q || !a) {
+        singleSqStatusMsg.textContent = 'Please enter both question and answer.';
+        singleSqStatusMsg.className = 'q-status-msg error';
+        return;
+      }
+      saveCurrentSquareInput(true);
+      updateBulkTextareasFromQuestions();
+      Sound.save();
+    });
+
+    btnClearSingleSq.addEventListener('click', function() {
+      const sq = parseInt(singleSqSelect.value, 10);
+      gameState.questions[sq - 1] = { q: '', a: '' };
+      saveQuestionsToStorage();
+      Sound.save();
+      singleQuestionInput.value = '';
+      singleAnswerInput.value = '';
+      populateSingleSquareDropdown(sq);
+      singleSqStatusMsg.textContent = 'Cleared question for square ' + sq + '.';
+      singleSqStatusMsg.className = 'q-status-msg success';
+      updateBoardQuestionButtonsAppearance();
+    });
+
+    // Save All Questions button
+    btnSaveAllQuestions.addEventListener('click', function() {
+      saveCurrentSquareInput(false);
+      saveQuestionsToStorage();
+      Sound.save();
+      updateBoardQuestionButtonsAppearance();
+      updateBulkTextareasFromQuestions();
+
+      let count = 0;
+      gameState.questions.forEach(function(item) {
+        if (item && item.q && item.q.trim().length > 0) count++;
+      });
+
+      allQuestionsStatus.textContent = '✓ ' + count + '/20 questions saved!';
+      allQuestionsStatus.style.color = '#6ee7b7';
+      setTimeout(function() {
+        allQuestionsStatus.textContent = '';
+      }, 3500);
+    });
+
+    // Load Default Questions button
+    btnLoadDefaultQuestions.addEventListener('click', function() {
+      for (let i = 0; i < 20; i++) {
+        gameState.questions[i] = {
+          q: DEFAULT_QUESTIONS[i].q,
+          a: DEFAULT_QUESTIONS[i].a
+        };
+      }
+      saveQuestionsToStorage();
+      Sound.save();
+      populateSingleSquareDropdown();
+      updateBoardQuestionButtonsAppearance();
+      allQuestionsStatus.textContent = '✓ Loaded 20 Science questions!';
+      allQuestionsStatus.style.color = '#6ee7b7';
+      setTimeout(function() {
+        allQuestionsStatus.textContent = '';
+      }, 3500);
+    });
+
+    btnBulkImport.addEventListener('click', function() {
+      const qLines = bulkQuestions.value.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
+      const aLines = bulkAnswers.value.split('\n').map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0; });
+
+      if (qLines.length === 0 || aLines.length === 0) {
+        bulkStatusMsg.textContent = 'Please enter at least one question and answer.';
+        bulkStatusMsg.className = 'q-status-msg error';
+        return;
+      }
+
+      if (qLines.length !== aLines.length) {
+        bulkStatusMsg.textContent = 'Line count mismatch: ' + qLines.length + ' questions vs ' + aLines.length + ' answers. They must be equal.';
+        bulkStatusMsg.className = 'q-status-msg error';
+        return;
+      }
+
+      if (qLines.length > 20) {
+        bulkStatusMsg.textContent = 'Maximum of 20 questions allowed (got ' + qLines.length + ').';
+        bulkStatusMsg.className = 'q-status-msg error';
+        return;
+      }
+
+      for (let i = 0; i < qLines.length; i++) {
+        gameState.questions[i] = { q: qLines[i], a: aLines[i] };
+      }
+
+      saveQuestionsToStorage();
+      Sound.save();
+      const curr = parseInt(singleSqSelect.value, 10) || 1;
+      populateSingleSquareDropdown(curr);
+      bulkStatusMsg.textContent = '✓ Successfully imported ' + qLines.length + ' questions for squares 1 to ' + qLines.length + '.';
+      bulkStatusMsg.className = 'q-status-msg success';
+      updateBoardQuestionButtonsAppearance();
+    });
+
+    /* START GAME INITIALIZATION */
+    const settingsScreen = document.getElementById('settingsScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const btnStartGame = document.getElementById('btnStartGame');
+    const btnBackSettings = document.getElementById('btnBackSettings');
+    const btnRestartGame = document.getElementById('btnRestartGame');
+
+    btnStartGame.addEventListener('click', function() {
+      saveCurrentSquareInput(false);
+      saveQuestionsToStorage();
+      initAudio();
+      Sound.save();
+      setupGamePlayers();
+      settingsScreen.classList.remove('active');
+      gameScreen.classList.add('active');
+      initBoardGrid();
+      resetBoardTokens();
+      renderPlayersList();
+      updateTurnDisplay();
+      window.dispatchEvent(new Event('resize'));
+    });
+
+    btnBackSettings.addEventListener('click', function() {
+      if (gameState.cpuTimer) clearTimeout(gameState.cpuTimer);
+      gameState.isBusy = false;
+      gameScreen.classList.remove('active');
+      settingsScreen.classList.add('active');
+      renderPlayerInputFields();
+    });
+
+    btnRestartGame.addEventListener('click', function() {
+      if (gameState.cpuTimer) clearTimeout(gameState.cpuTimer);
+      gameState.isGameOver = false;
+      gameState.isBusy = false;
+      victoryOverlay.classList.remove('show');
+      setupGamePlayers();
+      resetBoardTokens();
+      renderPlayersList();
+      updateTurnDisplay();
+      setStatusMessage('Game restarted! Click the dice to roll.');
+      Sound.save();
+    });
+
+    function setupGamePlayers() {
+      gameState.players = [];
+      const total = gameState.playerCount;
+      const inputs = playerInputsGrid.querySelectorAll('.player-name-input');
+
+      for (let i = 0; i < total; i++) {
+        let name = PLAYER_COLORS[i].name;
+        if (gameState.mode === 'cpu' && i === 1) {
+          name = 'CPU';
+        } else {
+          const val = inputs[i] ? inputs[i].value.trim() : (gameState.savedNames[i] || '');
+          if (val) name = val.slice(0, 22);
+        }
+
+        gameState.players.push({
+          id: i + 1,
+          name: name,
+          isCpu: (gameState.mode === 'cpu' && i === 1),
+          color: PLAYER_COLORS[i].color,
+          tokenClass: PLAYER_COLORS[i].class,
+          position: 0,
+          trophies: 0,
+          earnedSquares: new Set()
+        });
+      }
+
+      gameState.activeIndex = 0;
+      gameState.rolledValue = 0;
+      gameState.isBusy = false;
+      gameState.isGameOver = false;
+    }
+
+    /* BOARD BUILDER & QUESTION BUTTONS */
+    const boardGrid = document.getElementById('boardGrid');
+    const boardFrame = document.getElementById('boardFrame');
+    const tokensLayer = document.getElementById('tokensLayer');
+    const startingDock = document.getElementById('startingDock');
+    const dockTokensArea = document.getElementById('dockTokensArea');
+
+    function initBoardGrid() {
+      boardGrid.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 5; c++) {
+          const sqNum = SERPENTINE_ROWS[r][c];
+          const cell = document.createElement('div');
+          cell.className = 'square-cell';
+          cell.dataset.square = sqNum;
+          cell.id = 'square-cell-' + sqNum;
+
+          const qBtn = document.createElement('button');
+          qBtn.type = 'button';
+          qBtn.className = 'q-btn color-' + (((sqNum - 1) % 5) + 1);
+          qBtn.dataset.square = sqNum;
+          qBtn.setAttribute('aria-label', 'Open question for square ' + sqNum);
+
+          const qSpan = document.createElement('span');
+          qSpan.className = 'q-mark';
+          qSpan.textContent = '?';
+
+          const srSpan = document.createElement('span');
+          srSpan.className = 'sr-only';
+          srSpan.textContent = 'Square ' + sqNum;
+
+          qBtn.appendChild(qSpan);
+          qBtn.appendChild(srSpan);
+
+          (function(sq) {
+            qBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              onQuestionBtnClick(sq);
+            });
+          })(sqNum);
+
+          cell.appendChild(qBtn);
+          boardGrid.appendChild(cell);
+        }
+      }
+      updateBoardQuestionButtonsAppearance();
+    }
+
+    function updateBoardQuestionButtonsAppearance() {
+      for (let i = 1; i <= 20; i++) {
+        const btn = document.querySelector('.q-btn[data-square="' + i + '"]');
+        if (!btn) continue;
+        const hasQ = gameState.questions[i - 1] && gameState.questions[i - 1].q.trim().length > 0;
+        if (hasQ) {
+          btn.classList.add('has-question');
+        } else {
+          btn.classList.remove('has-question');
+        }
+      }
+    }
+
+    /* PLAYER TOKENS & CENTERING ENGINE */
+    let playerTokenElements = [];
+
+    function resetBoardTokens() {
+      tokensLayer.innerHTML = '';
+      playerTokenElements = [];
+
+      gameState.players.forEach(function(p) {
+        const tok = document.createElement('div');
+        tok.className = 'player-token ' + p.tokenClass;
+        tok.dataset.playerId = p.id;
+        tok.textContent = p.isCpu ? 'C' : p.id;
+        tok.setAttribute('aria-hidden', 'true');
+        tokensLayer.appendChild(tok);
+        playerTokenElements.push(tok);
+      });
+
+      updateAllTokenPositions();
+    }
+
+    function updateAllTokenPositions() {
+      const groups = {};
+      gameState.players.forEach(function(p, idx) {
+        const pos = p.position;
+        if (!groups[pos]) groups[pos] = [];
+        groups[pos].push(idx);
+      });
+
+      const frameRect = boardFrame.getBoundingClientRect();
+
+      Object.keys(groups).forEach(function(posStr) {
+        const pos = parseInt(posStr, 10);
+        const playerIndices = groups[pos];
+        const count = playerIndices.length;
+
+        let centerLeft, centerTop;
+
+        if (pos === 0) {
+          const dockRect = dockTokensArea.getBoundingClientRect();
+          centerLeft = dockRect.left - frameRect.left + dockRect.width / 2;
+          centerTop = dockRect.top - frameRect.top + dockRect.height / 2;
+
+          playerIndices.forEach(function(pIdx, clusterIdx) {
+            const tok = playerTokenElements[pIdx];
+            if (!tok) return;
+            const spacing = clamp(26, window.innerWidth * 0.045, 46);
+            const totalWidth = (count - 1) * spacing;
+            const offsetX = clusterIdx * spacing - totalWidth / 2;
+            tok.style.left = (centerLeft + offsetX) + 'px';
+            tok.style.top = centerTop + 'px';
+          });
+        } else {
+          const cell = document.getElementById('square-cell-' + pos);
+          if (!cell) return;
+          const cellRect = cell.getBoundingClientRect();
+
+          centerLeft = cellRect.left - frameRect.left + cellRect.width / 2;
+          centerTop = cellRect.top - frameRect.top + cellRect.height / 2;
+
+          const tokWidth = Math.min(cellRect.width, cellRect.height) * 0.22;
+          const D = clamp(10, tokWidth, 20);
+
+          if (count === 1) {
+            const tok = playerTokenElements[playerIndices[0]];
+            tok.style.left = centerLeft + 'px';
+            tok.style.top = centerTop + 'px';
+          } else if (count === 2) {
+            const offsets = [[-D * 1.1, 0], [D * 1.1, 0]];
+            playerIndices.forEach(function(pIdx, i) {
+              const tok = playerTokenElements[pIdx];
+              tok.style.left = (centerLeft + offsets[i][0]) + 'px';
+              tok.style.top = (centerTop + offsets[i][1]) + 'px';
+            });
+          } else if (count === 3) {
+            const offsets = [[-D, -D * 0.8], [D, -D * 0.8], [0, D * 0.9]];
+            playerIndices.forEach(function(pIdx, i) {
+              const tok = playerTokenElements[pIdx];
+              tok.style.left = (centerLeft + offsets[i][0]) + 'px';
+              tok.style.top = (centerTop + offsets[i][1]) + 'px';
+            });
+          } else if (count === 4) {
+            const offsets = [[-D, -D], [D, -D], [-D, D], [D, D]];
+            playerIndices.forEach(function(pIdx, i) {
+              const tok = playerTokenElements[pIdx];
+              tok.style.left = (centerLeft + offsets[i][0]) + 'px';
+              tok.style.top = (centerTop + offsets[i][1]) + 'px';
+            });
+          } else {
+            const offsets = [[-D * 1.1, -D * 1.1], [D * 1.1, -D * 1.1], [-D * 1.1, D * 1.1], [D * 1.1, D * 1.1], [0, 0]];
+            playerIndices.forEach(function(pIdx, i) {
+              const tok = playerTokenElements[pIdx];
+              tok.style.left = (centerLeft + offsets[i][0]) + 'px';
+              tok.style.top = (centerTop + offsets[i][1]) + 'px';
+            });
+          }
+        }
+      });
+    }
+
+    function clamp(min, val, max) {
+      return Math.max(min, Math.min(val, max));
+    }
+
+    window.addEventListener('resize', function() {
+      if (gameScreen.classList.contains('active')) {
+        updateAllTokenPositions();
+      }
+    });
+
+    /* CONTROL PANEL & TURN LOGIC */
+    const activePlayerName = document.getElementById('activePlayerName');
+    const activePlayerPip = document.getElementById('activePlayerPip');
+    const statusMessage = document.getElementById('statusMessage');
+    const btnDice = document.getElementById('btnDice');
+    const diceCube = document.getElementById('diceCube');
+    const btnMove = document.getElementById('btnMove');
+    const playersList = document.getElementById('playersList');
+
+    function setStatusMessage(msg) {
+      statusMessage.textContent = msg;
+    }
+
+    function updateTurnDisplay() {
+      const p = gameState.players[gameState.activeIndex];
+      if (!p) return;
+      activePlayerName.textContent = p.name;
+      activePlayerPip.style.background = p.color;
+
+      btnDice.disabled = gameState.isBusy || gameState.isGameOver;
+      btnMove.classList.add('hidden');
+
+      renderPlayersList();
+
+      if (p.isCpu && !gameState.isGameOver && !gameState.isBusy) {
+        setStatusMessage("CPU is thinking...");
+        gameState.cpuTimer = setTimeout(function() {
+          executeDiceRoll();
+        }, 900);
+      } else if (!p.isCpu && !gameState.isGameOver && !gameState.isBusy) {
+        setStatusMessage("Click the dice to roll.");
+      }
+    }
+
+    function renderPlayersList() {
+      playersList.innerHTML = '';
+      gameState.players.forEach(function(p, idx) {
+        const item = document.createElement('div');
+        item.className = 'player-list-item ' + (idx === gameState.activeIndex ? 'active' : '');
+
+        const left = document.createElement('div');
+        left.className = 'player-item-left';
+
+        const dot = document.createElement('div');
+        dot.className = 'player-item-dot';
+        dot.style.background = p.color;
+
+        const name = document.createElement('span');
+        name.className = 'player-item-name';
+        name.textContent = p.name + (p.isCpu ? ' (CPU)' : '');
+
+        left.appendChild(dot);
+        left.appendChild(name);
+
+        const trophies = document.createElement('div');
+        trophies.className = 'player-item-trophies';
+        trophies.textContent = '🏆 ' + p.trophies + '/5';
+
+        item.appendChild(left);
+        item.appendChild(trophies);
+        playersList.appendChild(item);
+      });
+    }
+
+    /* 3D DICE SYSTEM */
+    btnDice.addEventListener('click', function() {
+      initAudio();
+      const p = gameState.players[gameState.activeIndex];
+      if (gameState.isBusy || gameState.isGameOver || (p && p.isCpu)) return;
+      executeDiceRoll();
+    });
+
+    const DICE_FACE_ROTATIONS = {
+      1: { x: -12, y: 16 },
+      2: { x: -102, y: 16 },
+      3: { x: -12, y: -74 },
+      4: { x: -12, y: 106 },
+      5: { x: 78, y: 16 },
+      6: { x: -12, y: 196 }
+    };
+
+    function executeDiceRoll() {
+      gameState.isBusy = true;
+      btnDice.disabled = true;
+      btnMove.classList.add('hidden');
+
+      const rollVal = Math.floor(Math.random() * 6) + 1;
+      gameState.rolledValue = rollVal;
+
+      Sound.roll();
+
+      const spinsX = (Math.floor(Math.random() * 2) + 2) * 360;
+      const spinsY = (Math.floor(Math.random() * 2) + 2) * 360;
+      const targetRot = DICE_FACE_ROTATIONS[rollVal];
+
+      const finalRotX = targetRot.x + spinsX;
+      const finalRotY = targetRot.y + spinsY;
+
+      diceCube.style.transform = 'rotateX(' + finalRotX + 'deg) rotateY(' + finalRotY + 'deg)';
+
+      setTimeout(function() {
+        diceCube.style.transition = 'none';
+        diceCube.style.transform = 'rotateX(' + targetRot.x + 'deg) rotateY(' + targetRot.y + 'deg)';
+        void diceCube.offsetWidth;
+        diceCube.style.transition = 'transform 1s cubic-bezier(0.2, 0.8, 0.3, 1)';
+
+        const activeP = gameState.players[gameState.activeIndex];
+
+        if (activeP.isCpu) {
+          setStatusMessage('CPU rolled a ' + rollVal + '!');
+          gameState.cpuTimer = setTimeout(function() {
+            performMove();
+          }, 800);
+        } else {
+          setStatusMessage('You rolled a ' + rollVal + '!');
+          btnMove.textContent = rollVal === 1 ? 'Move 1 space' : ('Move ' + rollVal + ' spaces');
+          btnMove.classList.remove('hidden');
+          gameState.isBusy = false;
+        }
+      }, 1000);
+    }
+
+    btnMove.addEventListener('click', function() {
+      initAudio();
+      if (gameState.isBusy || gameState.isGameOver) return;
+      btnMove.classList.add('hidden');
+      performMove();
+    });
+
+    /* MOVEMENT & SNAKE & LADDER RESOLUTION */
+    async function performMove() {
+      gameState.isBusy = true;
+      btnDice.disabled = true;
+      btnMove.classList.add('hidden');
+
+      const p = gameState.players[gameState.activeIndex];
+      const roll = gameState.rolledValue;
+      const startPos = p.position;
+      const targetPos = startPos + roll;
+
+      if (targetPos > 20) {
+        setStatusMessage(p.name + ' needs an exact roll. The token stays put.');
+        Sound.blocked();
+        await sleep(1400);
+        passTurn();
+        return;
+      }
+
+      const tokElem = playerTokenElements[gameState.activeIndex];
+
+      for (let s = startPos + 1; s <= targetPos; s++) {
+        p.position = s;
+        if (tokElem) tokElem.classList.add('hopping');
+        Sound.step();
+        updateAllTokenPositions();
+        await sleep(150);
+        if (tokElem) tokElem.classList.remove('hopping');
+        await sleep(140);
+      }
+
+      if (p.position === 20) {
+        declareVictory(p, 'reached square 20!');
+        return;
+      }
+
+      const landingPos = p.position;
+      if (LADDERS[landingPos]) {
+        const dest = LADDERS[landingPos];
+        setStatusMessage('Ladder! ' + p.name + ' climbs to square ' + dest + '.');
+        Sound.ladder();
+        await sleep(700);
+        p.position = dest;
+        updateAllTokenPositions();
+        await sleep(700);
+      } else if (SNAKES[landingPos]) {
+        const dest = SNAKES[landingPos];
+        setStatusMessage('Oh no! A snake bites ' + p.name + ' and slides the token down to square ' + dest + '.');
+        Sound.snake();
+        showSnakeCryingToast(p.name);
+        await sleep(1000);
+        p.position = dest;
+        updateAllTokenPositions();
+        await sleep(800);
+      }
+
+      passTurn();
+    }
+
+    function passTurn() {
+      if (gameState.isGameOver) return;
+      gameState.activeIndex = (gameState.activeIndex + 1) % gameState.players.length;
+      gameState.isBusy = false;
+      updateTurnDisplay();
+    }
+
+    function sleep(ms) {
+      return new Promise(function(resolve) { setTimeout(resolve, ms); });
+    }
+
+    /* SNAKE CRYING TOAST */
+    const snakeToast = document.getElementById('snakeToast');
+    const snakeToastText = document.getElementById('snakeToastText');
+    function showSnakeCryingToast(playerName) {
+      snakeToastText.textContent = 'Oh no! A snake bites ' + playerName + '!';
+      snakeToast.classList.add('show');
+      setTimeout(function() {
+        snakeToast.classList.remove('show');
+      }, 1600);
+    }
+
+    /* QUESTION MODAL & ANSWER NORMALIZATION */
+    const questionModal = document.getElementById('questionModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalQuestionText = document.getElementById('modalQuestionText');
+    const modalAnswerInput = document.getElementById('modalAnswerInput');
+    const modalFeedback = document.getElementById('modalFeedback');
+    const btnModalClose = document.getElementById('btnModalClose');
+    const btnModalSubmit = document.getElementById('btnModalSubmit');
+
+    const btnToggleModalEdit = document.getElementById('btnToggleModalEdit');
+    const modalEditSection = document.getElementById('modalEditSection');
+    const modalEditQInput = document.getElementById('modalEditQInput');
+    const modalEditAInput = document.getElementById('modalEditAInput');
+    const btnModalSaveQ = document.getElementById('btnModalSaveQ');
+    const btnModalCancelEdit = document.getElementById('btnModalCancelEdit');
+
+    btnToggleModalEdit.addEventListener('click', function() {
+      if (modalEditSection.style.display === 'none') {
+        modalEditSection.style.display = 'flex';
+        const sq = gameState.openSquare;
+        const rec = (sq && gameState.questions[sq - 1]) || { q: '', a: '' };
+        modalEditQInput.value = rec.q || '';
+        modalEditAInput.value = rec.a || '';
+        modalEditQInput.focus();
+      } else {
+        modalEditSection.style.display = 'none';
+      }
+    });
+
+    btnModalCancelEdit.addEventListener('click', function() {
+      modalEditSection.style.display = 'none';
+    });
+
+    btnModalSaveQ.addEventListener('click', function() {
+      const sq = gameState.openSquare;
+      if (!sq) return;
+      const qVal = modalEditQInput.value.trim();
+      const aVal = modalEditAInput.value.trim();
+      if (!qVal || !aVal) {
+        modalFeedback.textContent = 'Please enter both question and answer.';
+        modalFeedback.className = 'modal-feedback wrong';
+        return;
+      }
+      gameState.questions[sq - 1] = { q: qVal, a: aVal };
+      saveQuestionsToStorage();
+      Sound.save();
+      updateBoardQuestionButtonsAppearance();
+      populateSingleSquareDropdown(sq);
+
+      modalQuestionText.textContent = qVal;
+      modalEditSection.style.display = 'none';
+      modalFeedback.textContent = '✓ Question saved! You can now answer below.';
+      modalFeedback.className = 'modal-feedback correct';
+      modalAnswerInput.focus();
+    });
+
+    function onQuestionBtnClick(sqNum) {
+      initAudio();
+      const p = gameState.players[gameState.activeIndex];
+
+      if (gameState.isBusy || gameState.isGameOver) return;
+      if (p && p.isCpu) return;
+
+      gameState.openSquare = sqNum;
+      const rec = gameState.questions[sqNum - 1];
+
+      modalTitle.textContent = 'Square ' + sqNum + ' question';
+      modalAnswerInput.value = '';
+      modalFeedback.textContent = '';
+      modalFeedback.className = 'modal-feedback';
+
+      if (!rec || !rec.q.trim()) {
+        modalQuestionText.textContent = 'No question saved for Square ' + sqNum + ' yet. Type it below to save & play!';
+        modalEditSection.style.display = 'flex';
+        modalEditQInput.value = '';
+        modalEditAInput.value = '';
+        questionModal.classList.add('open');
+        modalEditQInput.focus();
+        return;
+      }
+
+      modalEditSection.style.display = 'none';
+      modalQuestionText.textContent = rec.q;
+      questionModal.classList.add('open');
+      modalAnswerInput.focus();
+    }
+
+    function closeModal() {
+      questionModal.classList.remove('open');
+      gameState.openSquare = null;
+    }
+
+    btnModalClose.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', function(e) {
+      if (questionModal.classList.contains('open')) {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Enter') checkModalAnswer();
+      }
+    });
+
+    btnModalSubmit.addEventListener('click', checkModalAnswer);
+
+    function normalizeText(str) {
+      return (str || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[.,!?;:]+$/, '')
+        .replace(/\s+/g, ' ');
+    }
+
+    function checkModalAnswer() {
+      const sq = gameState.openSquare;
+      if (!sq) return;
+      const rec = gameState.questions[sq - 1];
+      if (!rec) return;
+
+      const userAns = normalizeText(modalAnswerInput.value);
+      const expectedAns = normalizeText(rec.a);
+      const p = gameState.players[gameState.activeIndex];
+
+      if (!userAns) {
+        modalFeedback.textContent = 'Please type an answer.';
+        modalFeedback.className = 'modal-feedback info';
+        return;
+      }
+
+      let isCorrect = (userAns === expectedAns);
+      if (!isCorrect) {
+        // Natural student variants for curriculum questions
+        const VARIANTS = {
+          '5': ['five'],
+          'five': ['5'],
+          'true': ['t', 'yes'],
+          'false': ['f', 'no'],
+          'fruit': ['fruits'],
+          'sugar': ['sugars'],
+          'protein': ['proteins', 'meat', 'fish'],
+          'eggs': ['egg'],
+          'tadpole': ['tadpoles'],
+          'young frog': ['young frogs', 'froglet', 'froglets'],
+          'adult frog': ['adult frogs', 'frog', 'frogs'],
+          'toddler': ['toddlers'],
+          'child': ['children', 'kid', 'kids'],
+          'adult': ['adults', 'grownup', 'grown up']
+        };
+        const alts = VARIANTS[expectedAns];
+        if (alts && alts.includes(userAns)) {
+          isCorrect = true;
+        }
+      }
+
+      if (!isCorrect) {
+        modalFeedback.textContent = 'Not quite—try again. Check spelling and spacing.';
+        modalFeedback.className = 'modal-feedback wrong';
+        Sound.wrong();
+        return;
+      }
+
+      if (p.earnedSquares.has(sq)) {
+        modalFeedback.textContent = 'Correct! You already earned the trophy for this square.';
+        modalFeedback.className = 'modal-feedback info';
+        Sound.correct();
+        return;
+      }
+
+      p.earnedSquares.add(sq);
+      p.trophies++;
+      modalFeedback.textContent = 'Correct! Trophy earned! ✨🏆';
+      modalFeedback.className = 'modal-feedback correct';
+      Sound.trophy();
+      renderPlayersList();
+
+      if (p.trophies >= 5) {
+        setTimeout(function() {
+          closeModal();
+          p.position = 20;
+          updateAllTokenPositions();
+          declareVictory(p, 'collected five trophies!');
+        }, 1200);
+      }
+    }
+
+    /* VICTORY SYSTEM & CONFETTI */
+    const victoryOverlay = document.getElementById('victoryOverlay');
+    const victoryPlayerName = document.getElementById('victoryPlayerName');
+    const victoryReason = document.getElementById('victoryReason');
+    const confettiContainer = document.getElementById('confettiContainer');
+    const btnPlayAgain = document.getElementById('btnPlayAgain');
+
+    function declareVictory(player, reasonText) {
+      gameState.isGameOver = true;
+      gameState.isBusy = true;
+      if (gameState.cpuTimer) clearTimeout(gameState.cpuTimer);
+
+      victoryPlayerName.textContent = player.name;
+      victoryReason.textContent = reasonText;
+      generateConfetti();
+      victoryOverlay.classList.add('show');
+      Sound.victory();
+    }
+
+    function generateConfetti() {
+      confettiContainer.innerHTML = '';
+      const colors = ['#ffd85b', '#40e8ff', '#ff5d66', '#18a75b', '#8a4de1', '#ffffff', '#ef8b20'];
+
+      for (let i = 0; i < 90; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = (Math.random() * 100) + '%';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = (2 + Math.random() * 3) + 's';
+        piece.style.animationDelay = (Math.random() * 2) + 's';
+        piece.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+        confettiContainer.appendChild(piece);
+      }
+    }
+
+    btnPlayAgain.addEventListener('click', function() {
+      victoryOverlay.classList.remove('show');
+      gameState.isGameOver = false;
+      gameState.isBusy = false;
+      setupGamePlayers();
+      resetBoardTokens();
+      renderPlayersList();
+      updateTurnDisplay();
+      setStatusMessage('Click the dice to roll.');
+      Sound.save();
+    });
+
+    /* INITIAL BOOTSTRAP */
+    loadSavedSettings();
+    updateModeSelection('cpu');
+    populateSingleSquareDropdown();
+  </script>
+</body>
+</html>
